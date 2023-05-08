@@ -12,7 +12,7 @@ const PLAYER_SPEED = 3
 const MONSTER_SPEED = 2
 let LAST_MOVE = {'U':false,'D':false,'R':false,'L':false}
 
-const VIEW_SIZE = UNIT_SIZE*6
+const VIEW_SIZE = UNIT_SIZE*7
 const FLASHLIGHT_SIZE = UNIT_SIZE*9
 
 let IN_MANSION = false
@@ -157,6 +157,16 @@ monster4.y = YPOS_4
 makeLabyrinth()
 
 function gameLoop() {
+  if ((player.x >= pos(9) + HALF_UNIT_SIZE && player.x <= pos(10))&&
+    (player.y > pos(14) && player.y <= pos(15) + HALF_UNIT_SIZE)) {
+    player.x = pos(13)
+  }
+  if ((player.x <= pos(10)) || 
+    (player.x < pos(18) && player.y < pos(18) && player.y > pos(10))) {
+    IN_MANSION = false
+  } else {
+    IN_MANSION = true
+  }
   if (MONSTER_LIST.some(monster => checkColision(player,monster))) {
     gameover()
   }
@@ -173,8 +183,17 @@ function gameLoop() {
 
   if (IN_MANSION){
     placeView()
+  } else {
+    removeView()
   }
-    
+}
+
+function removeView() {
+  app.stage.removeChild(rect1)
+  app.stage.removeChild(rect2)
+  app.stage.removeChild(rect3)
+  app.stage.removeChild(rect4)
+  app.stage.removeChild(view)
 }
 
 function placeView() {
@@ -308,7 +327,7 @@ function makeLabyrinth() {
   }
 
   // yMidWalls
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 8; i++) {
     const wall:Sprite = Sprite.from(Y_WALL_PATH)
     wall.anchor.set(0.5)
     wall.width = Y_WALL_WIDTH
@@ -418,7 +437,7 @@ function makeLabyrinth() {
   const MID_END = Y_START_BOT_Y_WALL-UNIT_SIZE*2
   for (let i = X_START; i <= X_END; i+=UNIT_SIZE*3) {
     for (let j = MID_START; j < MID_END; j+=UNIT_SIZE*2) {
-      if ((i != X_START && i != X_START + UNIT_SIZE*3) &&
+      if ((i != X_START + UNIT_SIZE*3) &&
         (i != X_START + UNIT_SIZE*3*2 || j != MID_START) &&
         (i != X_START + UNIT_SIZE*3*3 || j != MID_START+UNIT_SIZE*2) &&
         (i != X_START + UNIT_SIZE*3*4 || j != MID_START) &&
