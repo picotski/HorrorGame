@@ -45,6 +45,14 @@ appElement.appendChild(app.view as HTMLCanvasElement)
 
 app.ticker.add(gameLoop)
 
+// Background Sprite
+const bg:Sprite = Sprite.from('image/background.png')
+bg.anchor.set(0.5)
+bg.width = WINDOW_WIDTH
+bg.height = WINDOW_HEIGHT
+bg.x = WINDOW_WIDTH/2 - UNIT_SIZE*2
+bg.y = WINDOW_HEIGHT/2
+
 // Player Sprite
 const player:Sprite = Sprite.from(PLAYER_DOWN_PATH)
 player.anchor.set(0.5)
@@ -99,6 +107,7 @@ monster4.width = UNIT_SIZE*2
 monster4.height = UNIT_SIZE*2
 
 // Add Sprite
+app.stage.addChild(bg)
 app.stage.addChild(player)
 app.stage.addChild(monster1)
 app.stage.addChild(monster2)
