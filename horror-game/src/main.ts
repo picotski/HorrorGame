@@ -8,7 +8,7 @@ const WINDOW_HEIGHT = 750
 const UNIT = 30
 const UNIT_SIZE = WINDOW_WIDTH/UNIT
 const HALF_UNIT_SIZE = UNIT_SIZE/2
-const PLAYER_SPEED = 3
+const PLAYER_SPEED = 2
 const MONSTER_SPEED = 2
 let LAST_MOVE = {'U':false,'D':false,'R':false,'L':false}
 
@@ -16,6 +16,13 @@ const VIEW_SIZE = UNIT_SIZE*7
 const FLASHLIGHT_SIZE = UNIT_SIZE*9
 
 let IN_MANSION = false
+
+const BACKGROUND_PATH = 'image/background.png'
+const ROOF_PATH = 'image/roof.png'
+
+const GAMEOVER_PATH = 'image/gameover.jpg'
+const WIN_PATH = 'image/win.jpg'
+const EXIT_PATH = 'image/exit.png'
 
 const PLAYER_UP_PATH = 'image/hunter_up.png'
 const PLAYER_DOWN_PATH = 'image/hunter_down.png'
@@ -46,12 +53,29 @@ appElement.appendChild(app.view as HTMLCanvasElement)
 app.ticker.add(gameLoop)
 
 // Background Sprite
-const bg:Sprite = Sprite.from('image/background.png')
+const bg:Sprite = Sprite.from(BACKGROUND_PATH)
 bg.anchor.set(0.5)
 bg.width = WINDOW_WIDTH
 bg.height = WINDOW_HEIGHT
 bg.x = WINDOW_WIDTH/2 - UNIT_SIZE*2
 bg.y = WINDOW_HEIGHT/2
+
+// Roof Sprite
+const roof:Sprite = Sprite.from(ROOF_PATH)
+roof.anchor.set(0.5)
+roof.width = WINDOW_WIDTH
+roof.height = pos(18) + HALF_UNIT_SIZE
+roof.x = WINDOW_WIDTH - pos(9)
+roof.y = WINDOW_HEIGHT/2
+roof.angle = 90
+
+// Gameover Sprite
+const go:Sprite = Sprite.from(GAMEOVER_PATH)
+go.anchor.set(0.5)
+go.width = WINDOW_WIDTH
+go.height = WINDOW_HEIGHT/3*2
+go.x = WINDOW_WIDTH/2
+go.y = WINDOW_HEIGHT/2
 
 // Player Sprite
 const player:Sprite = Sprite.from(PLAYER_DOWN_PATH)
@@ -106,6 +130,14 @@ monster4.anchor.set(0.5)
 monster4.width = UNIT_SIZE*2
 monster4.height = UNIT_SIZE*2
 
+// Exit Sprite
+const exit:Sprite = Sprite.from(EXIT_PATH)
+exit.anchor.set(0.5)
+exit.x = pos(13)
+exit.y = pos(27) + HALF_UNIT_SIZE
+exit.width = UNIT_SIZE*2
+exit.height = UNIT_SIZE*2
+
 // Add Sprite
 app.stage.addChild(bg)
 app.stage.addChild(player)
@@ -113,11 +145,11 @@ app.stage.addChild(monster1)
 app.stage.addChild(monster2)
 app.stage.addChild(monster3)
 app.stage.addChild(monster4)
+app.stage.addChild(exit)
 
 // Entity List
 let MONSTER_LIST:Sprite[] = [monster1,monster2,monster3,monster4]
 let WALL_LIST:Sprite[] = []
-let ALL_ENTITY:Sprite[] = [...MONSTER_LIST,...WALL_LIST]
 
 // Keyboard movement
 let keys = {}
@@ -156,10 +188,16 @@ monster4.y = YPOS_4
 
 makeLabyrinth()
 
+addRoof()
+
 function gameLoop() {
   if ((player.x >= pos(9) + HALF_UNIT_SIZE && player.x <= pos(10))&&
     (player.y > pos(14) && player.y <= pos(15) + HALF_UNIT_SIZE)) {
+    removeRoof()
     player.x = pos(13)
+  }
+  if (player.x >= pos(12) && player.x <= pos(14) && player.y >= pos(27)) {
+    win()
   }
   if ((player.x <= pos(10)) || 
     (player.x < pos(18) && player.y < pos(18) && player.y > pos(10))) {
@@ -168,6 +206,8 @@ function gameLoop() {
     IN_MANSION = true
   }
   if (MONSTER_LIST.some(monster => checkColision(player,monster))) {
+    IN_MANSION = false
+    removeView()
     gameover()
   }
   if (!WALL_LIST.some(entity => checkColision(player,entity))) {
@@ -248,7 +288,6 @@ function makeLabyrinth() {
   }
 
   WALL_LIST = [...cornersTop,...cornersBot]
-  ALL_ENTITY = [...MONSTER_LIST,...WALL_LIST]
   
   // Place Corners
   for (let i = X_START; i <= X_END; i+=UNIT_SIZE*3) {
@@ -336,7 +375,6 @@ function makeLabyrinth() {
   }
 
   WALL_LIST = [...WALL_LIST,...xTopWalls,...yTopWalls,...xBotWalls,...yBotWalls,...yMidWalls]
-  ALL_ENTITY = [...MONSTER_LIST,...WALL_LIST]
 
   // Place Walls
   // xTopWalls
@@ -586,9 +624,33 @@ function pos(x:number) {
 
 function gameover() {
   app.ticker.remove(gameLoop)
-  console.log('gameover')
 
   app.stage.removeChildren()
 
-  // Create Game Over Sprite
+  // Create GameOver image
+  const imgElem = document.createElement('img')
+  imgElem.id = 'gameoverImg'
+  imgElem.src = GAMEOVER_PATH
+  appElement.firstChild.remove()
+  appElement.appendChild(imgElem)
+}
+
+function addRoof() {
+  app.stage.addChild(roof)
+}
+function removeRoof() {
+  app.stage.removeChild(roof)
+}
+
+function win() {
+  app.ticker.remove(gameLoop)
+
+  app.stage.removeChildren()
+
+  // Create Win image
+  const imgElem = document.createElement('img')
+  imgElem.id = 'gameoverImg'
+  imgElem.src = WIN_PATH
+  appElement.firstChild.remove()
+  appElement.appendChild(imgElem)
 }
